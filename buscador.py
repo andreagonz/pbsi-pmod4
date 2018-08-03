@@ -1,3 +1,5 @@
+from navegacion import hacer_peticion
+
 class FabricaBuscador():
 
     def get_buscador(self, nombre):
@@ -30,6 +32,7 @@ class Buscador():
 class BuscadorGoogle(Buscador):
 
     def busqueda(self, s, max_res=50, no_params=False, regex=False):
+        req = hacer_peticion("https://google.com/")
         return []
     
 class BuscadorBing(Buscador):
