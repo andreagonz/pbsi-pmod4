@@ -25,7 +25,7 @@ class Resultado():
 class Buscador():
 
     def busqueda(self, s, max_res=50, no_params=False, regex=False):
-        return None
+        return []
             
 class BuscadorGoogle(Buscador):
 
