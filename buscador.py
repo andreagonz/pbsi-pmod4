@@ -1,4 +1,5 @@
 from navegacion import hacer_peticion
+# from BeautifulSoup import BeautifulSoup
 
 class FabricaBuscador():
 

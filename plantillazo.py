@@ -14,6 +14,7 @@ import sys
 import optparse
 import navegacion as nav
 from formato import formato
+from buscador import FabricaBuscador
 
 def printError(msg, exit = False):
     """
