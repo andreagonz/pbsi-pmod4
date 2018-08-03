@@ -8,10 +8,10 @@ def formato(lst_res, tipo='txt', domains=False):
     return res_txt(lst_res, domains)
 
 def res_xml(lst_res, domains=False):
-    return xml
+    return 'xml'
 
 def res_html(lst_res, domains=False):
-    return html
+    return 'html'
     
 def res_txt(lst_res, domains=False):
-    return txt
+    return 'txt'
