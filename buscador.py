@@ -32,7 +32,7 @@ class Buscador():
 class BuscadorGoogle(Buscador):
 
     def busqueda(self, s, max_res=50, no_params=False, regex=False):
-        req = hacer_peticion("https://google.com/")
+        req = hacer_peticion("https://google.com/")        
         return []
     
 class BuscadorBing(Buscador):
