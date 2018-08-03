@@ -16,6 +16,6 @@ def res_html(lst_res, domains=False):
 def res_txt(lst_res, domains=False):
     for x in lst_res:
         print('Url: %s' % x.url)
-        print('Título: %s' % x.titulo)
+        print('Titulo: %s' % x.titulo)
         print('%s' % x.texto)
     return 'txt'
