@@ -1,5 +1,6 @@
 from navegacion import hacer_peticion
-# from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
+import urllib
 
 class FabricaBuscador():
 
@@ -27,36 +28,50 @@ class Resultado():
 
 class Buscador():
 
-    def busqueda(self, s, max_res=50, no_params=False, regex=False):
+    def busqueda(self, dicc, query, max_res=50, no_params=False):
         return []
             
 class BuscadorGoogle(Buscador):
 
-    def busqueda(self, s, max_res=50, no_params=False, regex=False):
-        req = hacer_peticion("https://google.com/")        
+    def busqueda(self, dicc, query, max_res=50, no_params=False):
         return []
-    
+
 class BuscadorBing(Buscador):
 
-    def busqueda(self, s, max_res=50, no_params=False, regex=False):
-        return []
-    
+    def busqueda(self, q, max_res=50, no_params=False, regex=False):
+        url = "http://www.bing.com/search?q=%s" % (q)
+        req = hacer_peticion(url)
+        soup = BeautifulSoup(req.text, 'lxml')
+        [s.extract() for s in soup('span')]
+        unwantedTags = ['a', 'strong', 'cite']
+        for tag in unwantedTags:
+            for match in soup.findAll(tag):
+                match.replaceWithChildren()
+        results = soup.findAll('li', { "class" : "b_algo" })
+        resultados = []
+        for result in results:
+            titulo = str(result.find('h2'))
+            url = type(result.find('h2').find('a'))
+            descripcion = str(result.find('p'))
+            resultados.append(Resultado(url, titulo, descripcion))
+        return resultados
+
 class BuscadorDuckduckgo(Buscador):
 
-    def busqueda(self, s, max_res=50, no_params=False, regex=False):        
+    def busqueda(self, dicc, query, max_res=50, no_params=False):        
         return []
 
 class BuscadorPastebin(Buscador):
 
-    def busqueda(self, s, max_res=50, no_params=False, regex=False):
+    def busqueda(self, dicc, query, max_res=50, no_params=False):
         return []
     
 class BuscadorBoardreader(Buscador):
 
-    def busqueda(self, s, max_res=50, no_params=False, regex=False):
+    def busqueda(self, dicc, query, max_res=50, no_params=False):
         return []
     
 class BuscadorZoneH(Buscador):
 
-    def busqueda(self, s, max_res=50, no_params=False, regex=False):
+    def busqueda(self, dicc, query, max_res=50, no_params=False):
         return []
