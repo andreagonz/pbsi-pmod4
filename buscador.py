@@ -38,8 +38,8 @@ class BuscadorGoogle(Buscador):
 
 class BuscadorBing(Buscador):
 
-    def busqueda(self, q, max_res=50, no_params=False, regex=False):
-        url = "http://www.bing.com/search?q=%s" % (q)
+    def busqueda(self, dicc, query, max_res=50, no_params=False):
+        url = "http://www.bing.com/search?q=%s" % (query)
         req = hacer_peticion(url)
         soup = BeautifulSoup(req.text, 'lxml')
         [s.extract() for s in soup('span')]
