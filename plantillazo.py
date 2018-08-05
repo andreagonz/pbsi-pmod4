@@ -11,10 +11,14 @@ Debian: apt-get install python-socks
 """
 
 import sys
+import exrex
 import optparse
-import navegacion as nav
+from random import randint
 from formato import formato
 from buscador import FabricaBuscador
+
+user_agents = ['firefox', 'chrome']
+proxies = [{'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}]
 
 def printError(msg, exit = False):
     """
@@ -37,7 +41,15 @@ def addOptions():
     parser.add_option('-d', '--domains', dest='domains', default=False, action="store_true", help='Make request with TOR')
     parser.add_option('-u', '--user-agents', dest='user_agents', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-p', '--proxies', dest='proxies', default=None, help='Port that the HTTP server is listening to.')
-    parser.add_option('-f', '--formato', dest='formato', default='txt', help='Port that the HTTP server is listening to.')
+    parser.add_option('-F', '--formato', dest='formato', default='txt', help='Port that the HTTP server is listening to.')
+    
+    parser.add_option('-i', '--ip', dest='ip', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-m', '--mail', dest='mail', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-f', '--filetype', dest='filetype', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-s', '--site', dest='site', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-e', '--exclude', dest='exclude', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-I', '--include', dest='include', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-U', '--inurl', dest='inurl', default=None, help='Port that the HTTP server is listening to.')
     return parser.parse_args()
 
 def myip():
@@ -58,18 +70,41 @@ def lee_proxies(proxies):
                 elif x[0] == 'https':
                     tmp['https'] = x[1]
             if len(tmp) > 0:
-                nav.proxies.append(tmp)
+                proxies.append(tmp)
 
 def lee_user_agents(user_agents):
     with open(user_agents) as f:
         for u in f.readlines():
-            nav.user_agents.append(u.strip())
+            user_agents.append(u.strip())
 
 def int_or_0(n):
     try:
-        return int(n)
+        return int(n) if int(n) >= 0 else 0
     except:
         return 0
+
+def agrega(lst, nom, op):
+    if not op:
+        return
+    l = [x.strip() for x in op.split(',')]
+    e = l.pop()
+    for x in lst:
+        x[nom] = e;
+    while len(l) > 0:
+        e = l.pop()
+        for x in lst.copy():
+            lst.append(dict(x))
+            lst[-1][nom] = e
+    
+def expandir(queries, dicc):
+    lst = [{}]
+    agrega(lst, 'ip', opts.ip)
+    agrega(lst, 'filetype', opts.filetype)
+    agrega(lst, 'site', opts.site)
+    agrega(lst, 'exclude', opts.exclude)
+    agrega(lst, 'include', opts.include)
+    agrega(lst, 'inurl', opts.inurl)
+    return [(d, q) for q in queries for d in lst]
     
 if __name__ == '__main__':
     try:
@@ -77,7 +112,6 @@ if __name__ == '__main__':
         if len(args) == 0:
             print("Uso: python3 %s <busqueda> [parametros]" % sys.argv[0])
             sys.exit(1)
-        query = args[0]
         if opts.proxies:
             lee_proxies(opts.proxies)
         if opts.user_agents:
@@ -86,10 +120,17 @@ if __name__ == '__main__':
         fabrica = FabricaBuscador()
         for x in opts.buscadores.split(','):
             buscadores.append(fabrica.get_buscador(x.strip()))
-        resultados = []
-        for b in buscadores:
-            resultados += b.busqueda(query, int_or_0(opts.num_res), opts.no_params, opts.regex)
-        print(formato(resultados, opts.formato, opts.domains))
-        # print(nav.hacer_peticion("http://google.com").text)
+        q = [x.strip() for x in args[0].split('+')]
+        queries = [y for x in q for y in list(exrex.generate(x))] if opts.regex else q
+        expansiones = expandir(queries, opts)
+        resultados = {}
+        for d, q in expansiones:
+            proxy = proxies[randint(0, len(proxies) - 1)]
+            for b in buscadores:
+                user_agent = user_agents[randint(0, len(user_agents) - 1)]
+                if not resultados.get(b.nombre, None):
+                    resultados[b.nombre] = []
+                resultados[b.nombre] += b.busqueda(d, q, proxy, user_agent, opts.num_res, opts.no_params)
+        formato(resultados, opts.formato, opts.domains)
     except Exception as e:
         printError('Ocurrio un error inesperado: %s' % str(e))

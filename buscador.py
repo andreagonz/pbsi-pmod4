@@ -27,20 +27,26 @@ class Resultado():
         self.texto = texto
 
 class Buscador():
-
-    def busqueda(self, dicc, query, max_res=50, no_params=False):
+        
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
         return []
             
 class BuscadorGoogle(Buscador):
 
-    def busqueda(self, dicc, query, max_res=50, no_params=False):
+    def __init__(self):
+        self.nombre = "Google"
+
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
         return []
 
 class BuscadorBing(Buscador):
 
-    def busqueda(self, dicc, query, max_res=50, no_params=False):
+    def __init__(self):
+        self.nombre = "Bing"
+
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
         url = "http://www.bing.com/search?q=%s" % (query)
-        req = hacer_peticion(url)
+        req = hacer_peticion(url, proxy, user_agent)
         soup = BeautifulSoup(req.text, 'lxml')
         [s.extract() for s in soup('span')]
         unwantedTags = ['a', 'strong', 'cite']
@@ -58,20 +64,32 @@ class BuscadorBing(Buscador):
 
 class BuscadorDuckduckgo(Buscador):
 
-    def busqueda(self, dicc, query, max_res=50, no_params=False):        
+    def __init__(self):
+        self.nombre = "DuckDuckGo"
+
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):        
         return []
 
 class BuscadorPastebin(Buscador):
 
-    def busqueda(self, dicc, query, max_res=50, no_params=False):
+    def __init__(self):
+        self.nombre = "Pastebin"
+
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
         return []
     
 class BuscadorBoardreader(Buscador):
 
-    def busqueda(self, dicc, query, max_res=50, no_params=False):
+    def __init__(self):
+        self.nombre = "BoardReader"
+
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
         return []
     
 class BuscadorZoneH(Buscador):
 
-    def busqueda(self, dicc, query, max_res=50, no_params=False):
+    def __init__(self):
+        self.nombre = "Zone-H"
+
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
         return []

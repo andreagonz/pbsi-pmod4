@@ -1,15 +1,20 @@
 import requests
-from random import randint
 from requests import get
 from requests.exceptions import ConnectionError
 
-user_agents = ['firefox', 'chrome']
-proxies = [{'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}]
+def printError(msg, exit = False):
+    """
+    Imprime mensaje de Error y sale del programa
+    """
+    sys.stderr.write('Error:\t%s\n' % msg)
+    if exit:
+        sys.exit(1)
 
-def hacer_peticion(url):
+def hacer_peticion(url, proxy, user_agent):
     try:
-        headers = {'User-Agent': user_agents[randint(0, len(user_agents) - 1)]}
-        return requests.get(url, headers=headers, proxies=proxies[randint(0, len(proxies) - 1)])
+        headers = {'User-Agent': user_agent}
+        return requests.get(url, headers=headers, proxies=proxy)
     except ConnectionError:
-        error('Error en la conexion, tal vez el servidor no esta arriba.', True)
+        printError('Error en la conexion a la url "%s", tal vez el servidor no esta arriba.' % url,
+                   True)
     return None
