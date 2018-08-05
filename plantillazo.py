@@ -121,14 +121,16 @@ if __name__ == '__main__':
         num_res = int_or_0(opts.num_res)
         resultados = {}
         for d, q in expansiones:
-            proxy = proxies[randint(0, len(proxies) - 1)]
+            i = randint(0, len(proxies) - 1)
+            proxy = proxies[i]
             for b in buscadores:
                 user_agent = user_agents[randint(0, len(user_agents) - 1)]
                 r = b.busqueda(d, q, proxy, user_agent, num_res, opts.no_params, intervalo)
                 if not r:
-                    for x in proxies:
-                        if x != proxy:
-                            r = b.busqueda(d, q, x, user_agent, num_res, opts.no_params, intervalo)
+                    for x in range(len(proxies)):
+                        i = (i + 1) % len(proxies)
+                        proxy = proxies[i]
+                        r = b.busqueda(d, q, proxy, user_agent, num_res, opts.no_params, intervalo)
                         if r: break
                 r = r if r else []
                 if not resultados.get(b.nombre, None):
