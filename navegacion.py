@@ -1,3 +1,4 @@
+import time
 import requests
 from requests import get
 from requests.exceptions import ConnectionError
@@ -10,8 +11,9 @@ def printError(msg, exit = False):
     if exit:
         sys.exit(1)
 
-def hacer_peticion(url, proxy, user_agent):
+def hacer_peticion(url, proxy, user_agent, intervalo=0):
     try:
+        time.sleep(intervalo)
         headers = {'User-Agent': user_agent}
         return requests.get(url, headers=headers, proxies=proxy)
     except ConnectionError:

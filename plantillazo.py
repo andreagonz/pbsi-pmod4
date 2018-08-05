@@ -39,25 +39,18 @@ def addOptions():
     parser.add_option('-N', '--no-params', dest='no_params', default=False, action='store_true', help='If specified, prints detailed information during execution.')
     parser.add_option('-r', '--regex', dest='regex', default=False, action="store_true", help='Make request with TOR')
     parser.add_option('-d', '--domains', dest='domains', default=False, action="store_true", help='Make request with TOR')
-    parser.add_option('-u', '--user-agents', dest='user_agents', default=None, help='Port that the HTTP server is listening to.')
-    parser.add_option('-p', '--proxies', dest='proxies', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-U', '--user-agents', dest='user_agents', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-P', '--proxies', dest='proxies', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-F', '--formato', dest='formato', default='txt', help='Port that the HTTP server is listening to.')
-    
-    parser.add_option('-i', '--ip', dest='ip', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-i', '--intervalo', dest='intervalo', default='0', help='Port that the HTTP server is listening to.')
+    parser.add_option('-p', '--ip', dest='ip', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-m', '--mail', dest='mail', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-f', '--filetype', dest='filetype', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-s', '--site', dest='site', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-e', '--exclude', dest='exclude', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-I', '--include', dest='include', default=None, help='Port that the HTTP server is listening to.')
-    parser.add_option('-U', '--inurl', dest='inurl', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-u', '--inurl', dest='inurl', default=None, help='Port that the HTTP server is listening to.')
     return parser.parse_args()
-
-def myip():
-    """
-    Devuelve la IP pública con la que se está realizando el request
-    """
-    my_ip = urlopen('http://ip.42.pl/raw').read()
-    print('La IP que se eśtá usando es: ', my_ip)
 
 def lee_proxies(proxies):
     with open(proxies) as f:
@@ -123,14 +116,23 @@ if __name__ == '__main__':
         q = [x.strip() for x in args[0].split('+')]
         queries = [y for x in q for y in list(exrex.generate(x))] if opts.regex else q
         expansiones = expandir(queries, opts)
+        intervalo = int_or_0(opts.intervalo)
+        num_res = int_or_0(opts.num_res)
         resultados = {}
         for d, q in expansiones:
             proxy = proxies[randint(0, len(proxies) - 1)]
             for b in buscadores:
                 user_agent = user_agents[randint(0, len(user_agents) - 1)]
+                r = b.busqueda(d, q, proxy, user_agent, num_res, opts.no_params, intervalo)
+                if not r:
+                    for x in proxies:
+                        r = b.busqueda(d, q, x, user_agent, num_res, opts.no_params, intervalo)
+                        if r: break
+                r = r if r else []
                 if not resultados.get(b.nombre, None):
                     resultados[b.nombre] = []
-                resultados[b.nombre] += b.busqueda(d, q, proxy, user_agent, opts.num_res, opts.no_params)
+                for x in r:                    
+                    resultados[b.nombre].append(x)
         formato(resultados, opts.formato, opts.domains)
     except Exception as e:
         printError('Ocurrio un error inesperado: %s' % str(e))

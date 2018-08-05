@@ -26,9 +26,15 @@ class Resultado():
         self.titulo = titulo
         self.texto = texto
 
+def myip(p, u, i):
+    """
+    Devuelve la IP pública con la que se está realizando el request
+    """
+    print(hacer_peticion('http://ip.42.pl/raw', p, u, i).text)
+
 class Buscador():
         
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
         return []
             
 class BuscadorGoogle(Buscador):
@@ -36,7 +42,7 @@ class BuscadorGoogle(Buscador):
     def __init__(self):
         self.nombre = "Google"
 
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
         return []
 
 class BuscadorBing(Buscador):
@@ -44,9 +50,10 @@ class BuscadorBing(Buscador):
     def __init__(self):
         self.nombre = "Bing"
 
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
+        # myip(proxy, user_agent, intervalo)
         url = "http://www.bing.com/search?q=%s" % (query)
-        req = hacer_peticion(url, proxy, user_agent)
+        req = hacer_peticion(url, proxy, user_agent, intervalo)
         soup = BeautifulSoup(req.text, 'lxml')
         [s.extract() for s in soup('span')]
         unwantedTags = ['a', 'strong', 'cite']
@@ -67,7 +74,7 @@ class BuscadorDuckduckgo(Buscador):
     def __init__(self):
         self.nombre = "DuckDuckGo"
 
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):        
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):        
         return []
 
 class BuscadorPastebin(Buscador):
@@ -75,7 +82,7 @@ class BuscadorPastebin(Buscador):
     def __init__(self):
         self.nombre = "Pastebin"
 
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
         return []
     
 class BuscadorBoardreader(Buscador):
@@ -83,7 +90,7 @@ class BuscadorBoardreader(Buscador):
     def __init__(self):
         self.nombre = "BoardReader"
 
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
         return []
     
 class BuscadorZoneH(Buscador):
@@ -91,5 +98,5 @@ class BuscadorZoneH(Buscador):
     def __init__(self):
         self.nombre = "Zone-H"
 
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False):
+    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
         return []
