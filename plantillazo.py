@@ -19,6 +19,7 @@ from buscador import FabricaBuscador
 
 user_agents = ['firefox', 'chrome']
 proxies = [{'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}]
+# proxies = [None]
 
 def printError(msg, exit = False):
     """
@@ -126,7 +127,8 @@ if __name__ == '__main__':
                 r = b.busqueda(d, q, proxy, user_agent, num_res, opts.no_params, intervalo)
                 if not r:
                     for x in proxies:
-                        r = b.busqueda(d, q, x, user_agent, num_res, opts.no_params, intervalo)
+                        if x != proxy:
+                            r = b.busqueda(d, q, x, user_agent, num_res, opts.no_params, intervalo)
                         if r: break
                 r = r if r else []
                 if not resultados.get(b.nombre, None):
