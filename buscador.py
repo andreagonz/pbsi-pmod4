@@ -68,8 +68,10 @@ class Buscador():
         user_agent e intervalo.
         Si obten_emails es verdadero, se indica que se obtengan los correos de los
         resultados de la busqúeda.
-        Guarda los objetos Resultado en el diccionario resultados.
+        Guarda los objetos Resultado en el diccionario resultados (llave url, valor Resultado)
         resultados es un diccionario con urls como llave, y objetos Resultado como valor.
+        Regresa el total de resultados nuevos encontrados
+        Regresa -1 si se descubre que la ip ha sido bloqueada        
         """
         return 0
     
@@ -80,6 +82,8 @@ class Buscador():
         Toma num_res como un límite de resultados aproximado, para cada petición se utiliza
         proxy, user_agent e intervalo.
         Si no_params es verdadero, se ignoran los parámetros GET.
+        Regresa una lista de objetos Resultado.
+        Regresa None si la ip ha sido bloqueada.
         """
         if verboso:
             print("Fecha: %s" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
@@ -110,6 +114,9 @@ class BuscadorGoogle(Buscador):
         self.nombre = "Google"
 
     def banned(self, url):
+        """
+        Regresa True syss la url indica que se ha bloqueado a la IP.
+        """
         return url.startswith('https://www.google.com/sorry/index')
     
     def get_url(self, dicc, query):
@@ -211,7 +218,7 @@ class BuscadorDuckduckgo(Buscador):
         self.nombre = "DuckDuckGo"
 
     def banned(self, url):
-        return url.startswith('https://www.google.com/sorry/index')
+        return False
     
     def get_url(self, dicc, query):
         url = "https://duckduckgo.com/?q="
