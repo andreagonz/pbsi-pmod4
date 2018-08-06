@@ -80,6 +80,10 @@ def agrega(lst, nom, op):
             lst[-1][nom] = e
     
 def expandir(queries, opts):
+    """
+    Regresa una lista de tuplas t, cada t tiene la forma (dicc, q), donde dicc es
+    un diccionario de términos y q es una cadena de búsqueda.
+    """
     lst = [{}]
     agrega(lst, 'ip', opts.ip)
     agrega(lst, 'filetype', opts.filetype)

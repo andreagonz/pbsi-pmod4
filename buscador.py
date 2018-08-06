@@ -42,6 +42,10 @@ def myip(p, u, i):
 class Buscador():
 
     def get_emails(self, link, titulo, descripcion, resultados):
+        """
+        Busca correos electrónicos en titulo y descripcion, crea un objeto
+        Resultado con los hallazgos y los agrega al diccionario resultados.
+        """
         emails = re.findall(email_regex, titulo)
         emails += re.findall(email_regex, descripcion)
         if len(emails) > 0:
@@ -49,14 +53,34 @@ class Buscador():
             resultados[link] = Resultado(link, titulo, descripcion)
 
     def get_url(self, dicc, query):
+        """
+        Usando el diccionario de términos dicc, y la búsqueda query, regresa el url
+        de una consulta.
+        dicc contiene las llaves ip, filetype, site, exclude, include, inurl y mail.
+        """
         return ""
 
     def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):
+        """
+        Obtiene los resultados de la búsqueda con la url proporcionada, de acuerdo al
+        número de iteración en el que se está, para hacer la petición hace uso de proxy,
+        user_agent e intervalo.
+        Si obten_emails es verdadero, se indica que se obtengan los correos de los
+        resultados de la busqúeda.
+        Guarda los objetos Resultado en el diccionario resultados.
+        resultados es un diccionario con urls como llave, y objetos Resultado como valor.
+        """
         return 0
     
     def busqueda(self, dicc, query, proxy, user_agent, num_res=50,
                  no_params=False, intervalo=0, verboso=False):
+        """
+        Efectúa una búsqueda usando el diccionario de términos dicc y la búsqueda query.
+        Toma num_res como un límite de resultados aproximado, para cada petición se utiliza
+        proxy, user_agent e intervalo.
+        Si no_params es verdadero, se ignoran los parámetros GET.
+        """
         if verboso:
             print("Fecha: %s" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
             myip(proxy, user_agent, intervalo)
@@ -186,6 +210,53 @@ class BuscadorDuckduckgo(Buscador):
     def __init__(self):
         self.nombre = "DuckDuckGo"
 
+    def banned(self, url):
+        return url.startswith('https://www.google.com/sorry/index')
+    
+    def get_url(self, dicc, query):
+        url = "https://duckduckgo.com/?q="
+        for k, v in dicc.items():
+            if k == 'mail':
+                url += '"@%s" ' % v
+            elif k == 'exclude':
+                url += '-%s ' % v
+            elif k == 'include':
+                url += '+%s ' % v
+            else:
+                url += "%s:%s " % (k, v)
+        return '%s"%s"' % (url, query)
+
+    def obten_resultados(self, url, resultados, iteracion, proxy,
+                         user_agent, intervalo, obten_emails, verboso=False):
+        url_p = '%s&start=%d' % (url, iteracion * 10)
+        req = hacer_peticion(url_p, proxy, user_agent, intervalo)
+        if verboso:
+            print("URL de búsqueda: %s" % req.url)
+        soup = BeautifulSoup(req.text, 'lxml')
+        if self.banned(req.url):
+            if verboso:
+                print('IP bloqueada\n')
+            return -1
+        results = soup.findAll('div', { "class" : "g" })
+        total = 0
+        for result in results:
+            if result.find('img'):
+                continue
+            r = result.find('h3', {'class' : 'r'})
+            titulo = r.text if r else ''
+            s = result.find('div', {'class': 's'})
+            descripcion = s.find('span', {'class': 'st'}).text if s else ''
+            link = r.find('a').get('href', '') if r else ''
+            if link.startswith('/url?'):
+                link = urljoin('https://google.com/', link)
+            if not resultados.get(link, None):
+                total += 1
+                if obten_emails:
+                    self.get_emails(link, titulo, descripcion, resultados)
+                else:
+                    resultados[link] = Resultado(link, titulo, descripcion)
+        return total
+    
 class BuscadorPastebin(Buscador):
 
     def __init__(self):
