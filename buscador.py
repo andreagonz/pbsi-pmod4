@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from navegacion import hacer_peticion
+from datetime import datetime
+from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from aux import email_regex, printError
 import urllib
@@ -56,6 +58,7 @@ class Buscador():
     def busqueda(self, dicc, query, proxy, user_agent, num_res=50,
                  no_params=False, intervalo=0, verboso=False):
         if verboso:
+            print("Fecha: %s" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
             myip(proxy, user_agent, intervalo)
             print("Expansión: %s %s" % (dicc, query))
         url = self.get_url(dicc, query)
@@ -82,8 +85,8 @@ class BuscadorGoogle(Buscador):
     def __init__(self):
         self.nombre = "Google"
 
-    def banned(self, html):
-        return False
+    def banned(self, url):
+        return url.startswith('https://www.google.com/sorry/index')
     
     def get_url(self, dicc, query):
         url = "https://www.google.com/search?q="
@@ -105,20 +108,24 @@ class BuscadorGoogle(Buscador):
         if verboso:
             print("URL de búsqueda: %s" % req.url)
         soup = BeautifulSoup(req.text, 'lxml')
-        if self.banned(soup.text):
+        if self.banned(req.url):
+            if verboso:
+                print('IP bloqueada\n')
             return -1
-        print(soup)
-        [s.extract() for s in soup('span')]
-        for match in soup.findAll('strong'):
-            match.replaceWithChildren()
-        results = soup.findAll('li', { "class" : "b_algo" })
+        results = soup.findAll('div', { "class" : "g" })
         total = 0
         for result in results:
-            titulo = result.find('h2').text
-            link = result.find('h2').find('a')['href']
+            if result.find('img'):
+                continue
+            r = result.find('h3', {'class' : 'r'})
+            titulo = r.text if r else ''
+            s = result.find('div', {'class': 's'})
+            descripcion = s.find('span', {'class': 'st'}).text if s else ''
+            link = r.find('a').get('href', '') if r else ''
+            if link.startswith('/url?'):
+                link = urljoin('https://google.com/', link)
             if not resultados.get(link, None):
                 total += 1
-                descripcion = result.find('p').text
                 if obten_emails:
                     self.get_emails(link, titulo, descripcion, resultados)
                 else:
