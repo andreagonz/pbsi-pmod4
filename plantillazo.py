@@ -16,18 +16,7 @@ import optparse
 from random import randint
 from formato import formato
 from buscador import FabricaBuscador
-
-user_agents = ['firefox', 'chrome']
-# proxies = [{'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}]
-proxies = [None]
-
-def printError(msg, exit = False):
-    """
-    Imprime mensaje de Error y sale del programa
-    """
-    sys.stderr.write('Error:\t%s\n' % msg)
-    if exit:
-        sys.exit(1)
+from aux import user_agents, proxies, printError
 
 def addOptions():
     """
@@ -51,7 +40,6 @@ def addOptions():
     parser.add_option('-e', '--exclude', dest='exclude', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-I', '--include', dest='include', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-u', '--inurl', dest='inurl', default=None, help='Port that the HTTP server is listening to.')
-    parser.add_option('-E', '--expansiones', dest='expansiones', default=False, action="store_true", help='Make request with TOR')
     return parser.parse_args()
 
 def lee_proxies(proxies):
@@ -121,7 +109,7 @@ if __name__ == '__main__':
         q = [x.strip() for x in args[0].split('+')] if len(args) > 0 else [""]
         queries = [y for x in q for y in list(exrex.generate(x))] if opts.regex else q
         expansiones = expandir(queries, opts)
-        if opts.expansiones:
+        if opts.verbose:
             print("Expansiones: %s\n" % str(expansiones))
         intervalo = int_or_0(opts.intervalo)
         num_res = int_or_0(opts.num_res)
@@ -131,12 +119,14 @@ if __name__ == '__main__':
             proxy = proxies[i]
             for b in buscadores:
                 user_agent = user_agents[randint(0, len(user_agents) - 1)]
-                r = b.busqueda(d, q, proxy, user_agent, num_res, opts.no_params, intervalo)
+                r = b.busqueda(d, q, proxy, user_agent, num_res,
+                               opts.no_params, intervalo, opts.verbose)
                 if not r:
                     for x in range(len(proxies)):
                         i = (i + 1) % len(proxies)
                         proxy = proxies[i]
-                        r = b.busqueda(d, q, proxy, user_agent, num_res, opts.no_params, intervalo)
+                        r = b.busqueda(d, q, proxy, user_agent, num_res,
+                                       opts.no_params, intervalo, opts.verbose)
                         if r: break
                 r = r if r else []
                 if not resultados.get(b.nombre, None):
@@ -145,5 +135,4 @@ if __name__ == '__main__':
                     resultados[b.nombre].append(x)
         formato(resultados, opts.formato, opts.domains)
     except Exception as e:
-        raise e
-        printError('Ocurrio un error inesperado: %s' % str(e))
+        printError('Ocurrio un error inesperado: %s' % e)

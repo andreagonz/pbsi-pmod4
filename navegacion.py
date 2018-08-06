@@ -2,14 +2,7 @@ import time
 import requests
 from requests import get
 from requests.exceptions import ConnectionError
-
-def printError(msg, exit = False):
-    """
-    Imprime mensaje de Error y sale del programa
-    """
-    sys.stderr.write('Error:\t%s\n' % msg)
-    if exit:
-        sys.exit(1)
+from aux import printError
 
 def hacer_peticion(url, proxy, user_agent, intervalo=0):
     try:

@@ -33,5 +33,4 @@ def res_txt(lst_res, domains=False):
                 print('Url: %s' % x.url)
                 print('Titulo: %s' % x.titulo)
                 print('%s\n' % x.texto)
-        print()
     
