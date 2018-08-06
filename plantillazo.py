@@ -18,8 +18,8 @@ from formato import formato
 from buscador import FabricaBuscador
 
 user_agents = ['firefox', 'chrome']
-proxies = [{'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}]
-# proxies = [None]
+# proxies = [{'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}]
+proxies = [None]
 
 def printError(msg, exit = False):
     """
@@ -90,7 +90,7 @@ def agrega(lst, nom, op):
             lst.append(dict(x))
             lst[-1][nom] = e
     
-def expandir(queries, dicc):
+def expandir(queries, opts):
     lst = [{}]
     agrega(lst, 'ip', opts.ip)
     agrega(lst, 'filetype', opts.filetype)
@@ -98,13 +98,16 @@ def expandir(queries, dicc):
     agrega(lst, 'exclude', opts.exclude)
     agrega(lst, 'include', opts.include)
     agrega(lst, 'inurl', opts.inurl)
-    return [(d, q) for q in queries for d in lst]
-    
+    agrega(lst, 'mail', opts.mail)
+    return [(d, q) for q in queries for d in lst if len(d) > 0 or len(q) > 0]
+
 if __name__ == '__main__':
     try:
         opts, args = addOptions()
-        if len(args) == 0:
-            print("Uso: python3 %s <busqueda> [parametros]" % sys.argv[0])
+        if len(args) == 0 and not opts.mail and not opts.ip and \
+           not opts.filetype and not opts.inurl and not opts.site:
+            print("Uso: python3 %s {<busqueda> [opciones] | {f --filetype | s --site | h --help | "
+                  "p --ip | u --inurl | m --mail} [opciones]" % sys.argv[0])
             sys.exit(1)
         if opts.proxies:
             lee_proxies(opts.proxies)
@@ -114,9 +117,10 @@ if __name__ == '__main__':
         fabrica = FabricaBuscador()
         for x in opts.buscadores.split(','):
             buscadores.append(fabrica.get_buscador(x.strip()))
-        q = [x.strip() for x in args[0].split('+')]
+        q = [x.strip() for x in args[0].split('+')] if len(args) > 0 else [""]
         queries = [y for x in q for y in list(exrex.generate(x))] if opts.regex else q
         expansiones = expandir(queries, opts)
+        print("Expansiones: %s\n" % str(expansiones))
         intervalo = int_or_0(opts.intervalo)
         num_res = int_or_0(opts.num_res)
         resultados = {}
@@ -139,4 +143,5 @@ if __name__ == '__main__':
                     resultados[b.nombre].append(x)
         formato(resultados, opts.formato, opts.domains)
     except Exception as e:
+        raise e
         printError('Ocurrio un error inesperado: %s' % str(e))

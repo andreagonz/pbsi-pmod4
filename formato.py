@@ -1,5 +1,6 @@
 from buscador import Resultado
 from datetime import datetime
+from urllib.parse import urlparse
 
 def formato(lst_res, tipo='txt', domains=False):
     if tipo == 'xml':
@@ -16,12 +17,17 @@ def res_html(lst_res, domains=False):
     return 'html'
     
 def res_txt(lst_res, domains=False):
-    print("Fecha: %s\n" % datetime.now())
+    print("Fecha: %s\n" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
     for b, lst in lst_res.items():
-        print("Resultados de %s" % b)
-        for x in lst:
-            print('Url: %s' % x.url)
-            print('Titulo: %s' % x.titulo)
-            print('%s\n' % x.texto)
+        print("RESULTADOS DE %s\n" % b.upper())
+        if domains:
+            l = list(set([urlparse(x.url).netloc for x in lst]))
+            for x in l:
+                print(x)
+        else:
+            for x in lst:
+                print('Url: %s' % x.url)
+                print('Titulo: %s' % x.titulo)
+                print('%s\n' % x.texto)
         print()
     

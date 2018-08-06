@@ -1,6 +1,12 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 from navegacion import hacer_peticion
 from bs4 import BeautifulSoup
 import urllib
+import re
+
+email_regex = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
 
 class FabricaBuscador():
 
@@ -52,21 +58,39 @@ class BuscadorBing(Buscador):
 
     def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
         # myip(proxy, user_agent, intervalo)
-        url = "http://www.bing.com/search?q=%s" % (query)
+        url = "http://www.bing.com/search?q="
+        for k, v in dicc.items():
+            if k == 'mail':
+                url += '"@%s" ' % v
+            elif k == 'exclude':
+                pass
+            elif k == 'include':
+                pass
+            elif k == 'inurl':
+                url += "%s:%s " % ('instreamset:url', v)
+            else:
+                url += "%s:%s " % (k, v)
+        url += "%s" % query
         req = hacer_peticion(url, proxy, user_agent, intervalo)
+        # print(req.url)
         soup = BeautifulSoup(req.text, 'lxml')
         [s.extract() for s in soup('span')]
-        unwantedTags = ['a', 'strong', 'cite']
-        for tag in unwantedTags:
-            for match in soup.findAll(tag):
-                match.replaceWithChildren()
+        for match in soup.findAll('strong'):
+            match.replaceWithChildren()
         results = soup.findAll('li', { "class" : "b_algo" })
         resultados = []
         for result in results:
-            titulo = str(result.find('h2'))
-            url = type(result.find('h2').find('a'))
-            descripcion = str(result.find('p'))
-            resultados.append(Resultado(url, titulo, descripcion))
+            titulo = result.find('h2').text
+            url = result.find('h2').find('a')['href']
+            descripcion = result.find('p').text
+            if dicc.get('mail', None):
+                emails = re.findall(email_regex, titulo)
+                emails += re.findall(email_regex, descripcion)
+                if len(emails) > 0:
+                    descripcion = "Correos electrónicos: %s" % ', '.join(emails)
+                    resultados.append(Resultado(url, titulo, descripcion))
+            else:
+                resultados.append(Resultado(url, titulo, descripcion))
         return resultados
 
 class BuscadorDuckduckgo(Buscador):
@@ -89,14 +113,6 @@ class BuscadorBoardreader(Buscador):
 
     def __init__(self):
         self.nombre = "BoardReader"
-
-    def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
-        return []
-    
-class BuscadorZoneH(Buscador):
-
-    def __init__(self):
-        self.nombre = "Zone-H"
 
     def busqueda(self, dicc, query, proxy, user_agent, max_res=50, no_params=False, intervalo=0):
         return []
