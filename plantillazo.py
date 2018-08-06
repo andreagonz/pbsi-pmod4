@@ -51,6 +51,7 @@ def addOptions():
     parser.add_option('-e', '--exclude', dest='exclude', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-I', '--include', dest='include', default=None, help='Port that the HTTP server is listening to.')
     parser.add_option('-u', '--inurl', dest='inurl', default=None, help='Port that the HTTP server is listening to.')
+    parser.add_option('-E', '--expansiones', dest='expansiones', default=False, action="store_true", help='Make request with TOR')
     return parser.parse_args()
 
 def lee_proxies(proxies):
@@ -120,7 +121,8 @@ if __name__ == '__main__':
         q = [x.strip() for x in args[0].split('+')] if len(args) > 0 else [""]
         queries = [y for x in q for y in list(exrex.generate(x))] if opts.regex else q
         expansiones = expandir(queries, opts)
-        print("Expansiones: %s\n" % str(expansiones))
+        if opts.expansiones:
+            print("Expansiones: %s\n" % str(expansiones))
         intervalo = int_or_0(opts.intervalo)
         num_res = int_or_0(opts.num_res)
         resultados = {}

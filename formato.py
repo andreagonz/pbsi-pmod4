@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 from buscador import Resultado
 from datetime import datetime
 from urllib.parse import urlparse
@@ -19,7 +22,8 @@ def res_html(lst_res, domains=False):
 def res_txt(lst_res, domains=False):
     print("Fecha: %s\n" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
     for b, lst in lst_res.items():
-        print("RESULTADOS DE %s\n" % b.upper())
+        print("RESULTADOS DE %s" % b.upper())
+        print("Número de resultados: %d\n" % len(lst))
         if domains:
             l = list(set([urlparse(x.url).netloc for x in lst]))
             for x in l:
