@@ -196,11 +196,12 @@ def res_txt(lst_res, domains=False, nombre='resultados'):
     f.write("Fecha: %s\n" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
     for b, lst in lst_res.items():
         f.write("RESULTADOS DE %s \n" % b.upper())
-        f.write("Número de resultados: %d\n" % len(lst))
+        f.write("Número de resultados: %d\n\n" % len(lst))
         if domains:
             l = list(set([urlparse(x.url).netloc for x in lst]))
             for x in l:
                 f.write(x)
+                f.write("\n")
         else:
             for x in lst:
                 f.write('\n\nUrl: %s' % x.url)
@@ -208,5 +209,4 @@ def res_txt(lst_res, domains=False, nombre='resultados'):
                 f.write('\n%s' % x.texto)
         f.write("\n###########################\n")
     f.close()
-
     
