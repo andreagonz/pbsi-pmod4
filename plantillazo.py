@@ -55,20 +55,16 @@ def addOptions():
 def lee_proxies(p_lst):
     with open(p_lst) as f:
         for p in f.readlines():
-            tmp = {}
-            l = [x.strip().split('=') for x in p.split(',')]
-            for x in l:
-                if x[0] == 'http':
-                    tmp['http'] = x[1]
-                elif x[0] == 'https':
-                    tmp['https'] = x[1]
-            if len(tmp) > 0:
-                proxies.append(tmp)
-
+            p = p.strip()
+            if p:
+                proxies.append({'http':p, 'https':p})
+                
 def lee_user_agents(ua):
     with open(ua) as f:
         for u in f.readlines():
-            user_agents.append(u.strip())
+            u = u.strip()
+            if u:
+                user_agents.append(u)
 
 def int_or_0(n):
     try:
@@ -146,7 +142,7 @@ if __name__ == '__main__':
                 r = r if r else []
                 if not resultados.get(b.nombre, None):
                     resultados[b.nombre] = []
-                for x in r:                    
+                for x in r:
                     resultados[b.nombre].append(x)
         for x in opts.formato.split(','):
             formato(resultados, x.strip(), opts.domains, opts.output, opts.verbose)
