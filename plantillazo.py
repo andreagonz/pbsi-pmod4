@@ -42,10 +42,11 @@ def addOptions():
     parser.add_option('-F', '--formato', dest='formato', default='txt', help='Especifica el formato de salida')
     parser.add_option('-i', '--intervalo', dest='intervalo', default='0', help='Se especifica el intervalo de tiempo por busqueda')
     parser.add_option('-p', '--ip', dest='ip', default=None, help='Se especifica la(s) IP(s) de busqueda, separadas por una coma')
-    parser.add_option('-m', '--mail', dest='mail', default=None, help='Busca correos electronicos en los dominios especificado, separados por una coma')
+    parser.add_option('-m', '--mail', dest='mail', default=None, help='Busca correos electronicos en los dominios especificados, separados por una coma')
     parser.add_option('-f', '--filetype', dest='filetype', default=None, help='Se busca por los tipos de archivo especificados, separados por una coma')
     parser.add_option('-s', '--site', dest='site', default=None, help='Se busca por los sitios web especificados, separados por una coma')
     parser.add_option('-e', '--exclude', dest='exclude', default=None, help='Se excluyen los resultados que contengan esa palabra')
+    parser.add_option('-w', '--exact-word', dest='exact_word', default=None, help='Se buscan las palabras indicadas de manera exacta, cada una va separada por una coma')
     parser.add_option('-I', '--include', dest='include', default=None, help='Se incluyen los resultados que contengan esa palabra')
     parser.add_option('-u', '--inurl', dest='inurl', default=None, help='Se busca las palabras dentro de la url, separadas por comas')
     return parser.parse_args()
@@ -100,6 +101,7 @@ def expandir(queries, opts):
     agrega(lst, 'include', opts.include)
     agrega(lst, 'inurl', opts.inurl)
     agrega(lst, 'mail', opts.mail)
+    agrega(lst, 'exact_word', opts.exact_word)
     return [(d, q) for q in queries for d in lst if len(d) > 0 or len(q) > 0]
 
 if __name__ == '__main__':

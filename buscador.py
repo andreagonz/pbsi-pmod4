@@ -130,9 +130,11 @@ class BuscadorGoogle(Buscador):
                 url += '-%s ' % v
             elif k == 'include':
                 url += '+%s ' % v
+            elif k == 'exact_word':
+                url += '"%s" ' % v
             else:
                 url += "%s:%s " % (k, v)
-        return '%s%s' % (url, '"%s"' % query if query else '')
+        return '%s%s' % (url, query)
 
     def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):
@@ -184,9 +186,11 @@ class BuscadorBing(Buscador):
                 url += '+%s ' % v
             elif k == 'inurl':
                 url += "instreamset:url:%s " % v
+            elif k == 'exact_word':
+                url += '"%s" ' % v
             else:
                 url += "%s:%s " % (k, v)
-        return '%s%s' % (url, '"%s"' % query if query else '')
+        return '%s%s' % (url, query)
 
     def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):
@@ -235,9 +239,11 @@ class BuscadorDuckduckgo(Buscador):
                 q += '-%s ' % v
             elif k == 'include':
                 q += '+%s ' % v
+            elif k == 'exact_word':
+                url += '"%s" ' % v
             else:
                 q += "%s:%s " % (k, v)
-        return url, ('%s"%s"' % (q, query)).strip()
+        return url, ('%s%s' % (q, query)).strip()
 
     def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):
@@ -279,7 +285,16 @@ class BuscadorPastebin(Buscador):
 
     def __init__(self):
         self.nombre = "Pastebin"
-        
+
+    def get_url(self, dicc, query):
+        dicc['site'] = 'pastebin.com'
+        return BuscadorGoogle().get_url(dicc, query)
+    
+    def obten_resultados(self, url, resultados, iteracion, proxy,
+                         user_agent, intervalo, obten_emails, verboso=False):
+        return BuscadorGoogle().obten_resultados(url, resultados, iteracion, proxy,
+                         user_agent, intervalo, obten_emails, verboso)
+    
 class BuscadorBoardreader(Buscador):
 
     def __init__(self):
@@ -297,6 +312,8 @@ class BuscadorBoardreader(Buscador):
                 url += '-%s ' % v
             elif k == 'include':
                 url += '%s ' % v
+            elif k == 'exact_word':
+                url += '"%s" ' % v
         url = '%s%s&language=English' % (url, '%s' % query if query else '')
         return url + "&domain=%s" % dicc['site'] if dicc.get('site', None) else url
 
