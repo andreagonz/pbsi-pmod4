@@ -139,4 +139,4 @@ if __name__ == '__main__':
                     resultados[b.nombre].append(x)
         formato(resultados, opts.formato, opts.domains)
     except Exception as e:
-        printError('Ocurrio un error inesperado: %s' % e)
+        printError(e)
