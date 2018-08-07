@@ -6,7 +6,9 @@ from aux import email_regex, printError
 from navegacion import hacer_peticion
 from datetime import datetime
 from bs4 import BeautifulSoup
+import requests
 import urllib
+import json
 import re
 
 class FabricaBuscador():
@@ -277,9 +279,17 @@ class BuscadorPastebin(Buscador):
 
     def __init__(self):
         self.nombre = "Pastebin"
+        
+class BuscadorBoardreader(Buscador):
 
+    def __init__(self):
+        self.nombre = "BoardReader"
+
+    def banned(self, html):
+        return False
+    
     def get_url(self, dicc, query):
-        url = "https://boardreader.com/return.php?language=English&query="
+        url = "https://boardreader.com/return.php?query="
         for k, v in dicc.items():
             if k == 'mail':
                 url += '"@%s" ' % v
@@ -287,12 +297,33 @@ class BuscadorPastebin(Buscador):
                 url += '-%s ' % v
             elif k == 'include':
                 url += '%s ' % v
-            elif k != 'site':
-                url += "%s:%s " % (k, v)
-        url = '%s%s' % (url, '"%s"' % query if query else '')
+        url = '%s%s&language=English' % (url, '%s' % query if query else '')
         return url + "&domain=%s" % dicc['site'] if dicc.get('site', None) else url
-    
-class BuscadorBoardreader(Buscador):
 
-    def __init__(self):
-        self.nombre = "BoardReader"
+    def obten_resultados(self, url, resultados, iteracion, proxy,
+                         user_agent, intervalo, obten_emails, verboso=False):
+        s = requests.Session()
+        url_b = 'https://boardreader.com'
+        req = hacer_peticion(url_b, proxy, user_agent, intervalo, sesion=s)
+        if self.banned(req.text):
+            return -1
+        url_p = url + "&page=%d" % (iteracion + 1)
+        req = hacer_peticion(url_p, proxy, user_agent, intervalo, sesion=s)
+        if verboso:
+            print("URL de búsqueda: %s" % req.url)
+        data = json.loads(req.text)
+        if not data.get('SearchResults', None):
+            return 0        
+        results = data['SearchResults']
+        total = 0
+        for result in results:
+            titulo = result.get('Subject', '').replace('[Keyword]', '').replace('[/Keyword]', '')
+            link = result.get('Url', '')
+            if not resultados.get(link, None):
+                total += 1
+                descripcion = result.get('Text', '').replace('[Keyword]', '').replace('[/Keyword]', '').replace('\n', ' ')
+                if obten_emails:
+                    self.get_emails(link, titulo, descripcion, resultados)
+                else:
+                    resultados[link] = Resultado(link, titulo, descripcion)
+        return total

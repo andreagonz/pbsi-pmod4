@@ -15,6 +15,6 @@ def printError(e, exit = False):
     Imprime mensaje de Error y sale del programa
     """
     sys.stderr.write('Error:\t%s\n' % str(e))
-    # raise e
+    raise e
     if exit:
         sys.exit(1)
