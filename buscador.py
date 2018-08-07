@@ -130,7 +130,7 @@ class BuscadorGoogle(Buscador):
                 url += '+%s ' % v
             else:
                 url += "%s:%s " % (k, v)
-        return '%s"%s"' % (url, query)
+        return '%s%s' % (url, '"%s"' % query if query else '')
 
     def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):
@@ -201,11 +201,14 @@ class BuscadorBing(Buscador):
         results = soup.findAll('li', { "class" : "b_algo" })
         total = 0
         for result in results:
-            titulo = result.find('h2').text
-            link = result.find('h2').find('a')['href']
+            h2 = result.find('h2')
+            titulo = h2.text if h2 else ''
+            a = h2.find('a') if h2 else None
+            link = a.get('href', '') if a else ''
             if not resultados.get(link, None):
                 total += 1
-                descripcion = result.find('p').text
+                p = result.find('p')
+                descripcion = p.text if p else ''
                 if obten_emails:
                     self.get_emails(link, titulo, descripcion, resultados)
                 else:
@@ -221,7 +224,7 @@ class BuscadorDuckduckgo(Buscador):
         return 'If this error persists, please let us know: error-lite@duckduckgo.com' in raw
     
     def get_url(self, dicc, query):
-        url = "https://duckduckgo.com/html/?"
+        url = "https://duckduckgo.com/html/"
         q = ""
         for k, v in dicc.items():
             if k == 'mail':
@@ -274,6 +277,20 @@ class BuscadorPastebin(Buscador):
 
     def __init__(self):
         self.nombre = "Pastebin"
+
+    def get_url(self, dicc, query):
+        url = "https://boardreader.com/return.php?language=English&query="
+        for k, v in dicc.items():
+            if k == 'mail':
+                url += '"@%s" ' % v
+            elif k == 'exclude':
+                url += '-%s ' % v
+            elif k == 'include':
+                url += '%s ' % v
+            elif k != 'site':
+                url += "%s:%s " % (k, v)
+        url = '%s%s' % (url, '"%s"' % query if query else '')
+        return url + "&domain=%s" % dicc['site'] if dicc.get('site', None) else url
     
 class BuscadorBoardreader(Buscador):
 
