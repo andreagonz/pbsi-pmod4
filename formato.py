@@ -9,19 +9,21 @@ from urllib.parse import urlparse
 from lxml import etree
 
 
-def formato(lst_res, tipo='txt', domains=False):
+def formato(lst_res, tipo='txt', domains=False, nombre='resultados', verboso=False):
+    if verboso:
+        print("Escribiendo reporte con formato %s." % tipo)
     if tipo == 'xml':
-        res_xml(lst_res, domains)
+        res_xml(lst_res, domains, nombre)
     elif tipo == 'html':
-        res_html(lst_res, domains)
+        res_html(lst_res, domains, nombre)
     else:
-        res_txt(lst_res, domains)
+        res_txt(lst_res, domains, nombre)
 
-def res_xml(lst_res, domains=False):
+def res_xml(lst_res, domains=False, nombre='resultados'):
 
 
 
-    f = open ('resultados.xml','w')
+    f = open ('%s.xml' % nombre, 'w')
        
     #f.write("###########################\n")
     #f.write("Fecha: %s\n" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
@@ -77,8 +79,8 @@ def res_xml(lst_res, domains=False):
 
     return 'xml'
 
-def res_html(lst_res, domains=False):
-    f = open ('resultados.html','w')
+def res_html(lst_res, domains=False, nombre='resultados'):
+    f = open ('%s.html' % nombre,'w')
     salto = "<br>"   
     f.write("###########################%s"%salto)
     f.write("%sFecha: %s%s" % (salto,datetime.now().strftime('%d-%b-%Y %H:%M:%S'),salto))
@@ -186,9 +188,9 @@ th, td {
     return 'html'
     
     
-def res_txt(lst_res, domains=False):
+def res_txt(lst_res, domains=False, nombre='resultados'):
 
-    f = open ('resultados.txt','w')
+    f = open ('%s.txt' % nombre,'w')
        
     f.write("###########################\n")
     f.write("Fecha: %s\n" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))

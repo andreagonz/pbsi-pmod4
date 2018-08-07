@@ -49,6 +49,7 @@ def addOptions():
     parser.add_option('-w', '--exact-word', dest='exact_word', default=None, help='Se buscan las palabras indicadas de manera exacta, cada una va separada por una coma')
     parser.add_option('-I', '--include', dest='include', default=None, help='Se incluyen los resultados que contengan esa palabra')
     parser.add_option('-u', '--inurl', dest='inurl', default=None, help='Se busca las palabras dentro de la url, separadas por comas')
+    parser.add_option('-o', '--output', dest='output', default='resultados', help='Nombre de los archivos de reporte.')
     return parser.parse_args()
 
 def lee_proxies(p_lst):
@@ -147,6 +148,7 @@ if __name__ == '__main__':
                     resultados[b.nombre] = []
                 for x in r:                    
                     resultados[b.nombre].append(x)
-        formato(resultados, opts.formato, opts.domains)
+        for x in opts.formato.split(','):
+            formato(resultados, x.strip(), opts.domains, opts.output, opts.verbose)
     except Exception as e:
         printError(e)
