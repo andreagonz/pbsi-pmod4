@@ -8,6 +8,14 @@ Debian: apt-get install tor
 Iniciarlo: service tor start o simplemente colocar el comado tor (Depende de como es que se haya instalado)
 De igual forma se debe instalar socks
 Debian: apt-get install python3-socks
+
+Ademas instalar:
+
+apt-get install python3-pip
+pip3 install exrex
+pip3 install BeautifulSoup4
+pip3 install lxml
+
 """
 
 import sys
