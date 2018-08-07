@@ -42,8 +42,8 @@ def addOptions():
     parser.add_option('-u', '--inurl', dest='inurl', default=None, help='Port that the HTTP server is listening to.')
     return parser.parse_args()
 
-def lee_proxies(proxies):
-    with open(proxies) as f:
+def lee_proxies(p_lst):
+    with open(p_lst) as f:
         for p in f.readlines():
             tmp = {}
             l = [x.strip().split('=') for x in p.split(',')]
@@ -55,8 +55,8 @@ def lee_proxies(proxies):
             if len(tmp) > 0:
                 proxies.append(tmp)
 
-def lee_user_agents(user_agents):
-    with open(user_agents) as f:
+def lee_user_agents(ua):
+    with open(ua) as f:
         for u in f.readlines():
             user_agents.append(u.strip())
 

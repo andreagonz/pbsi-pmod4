@@ -3,7 +3,6 @@
 
 from urllib.parse import urljoin, parse_qs, urlparse
 from aux import email_regex, printError
-from lxml import html
 from navegacion import hacer_peticion
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -222,7 +221,7 @@ class BuscadorDuckduckgo(Buscador):
         return 'If this error persists, please let us know: error-lite@duckduckgo.com' in raw
     
     def get_url(self, dicc, query):
-        url = "https://duckduckgo.com/html/"
+        url = "https://duckduckgo.com/html/?"
         q = ""
         for k, v in dicc.items():
             if k == 'mail':
@@ -235,65 +234,41 @@ class BuscadorDuckduckgo(Buscador):
                 q += "%s:%s " % (k, v)
         return url, ('%s"%s"' % (q, query)).strip()
 
-    def obten_resultados(self, url, resultados, data, proxy,
+    def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):
-        req = hacer_peticion(url, proxy, user_agent, intervalo, True, data)
+        url_p, q = url
+        data = {'q' : q, 'kl' : 'us-en'}
+        if iteracion > 0:
+            data['api'] = '/d.js'
+            data['o'] = 'json'
+            data['v'] = 'l'
+            data['dc'] = 31 if iteracion == 1 else ((iteracion - 1) * 50) + 31
+            data['s'] = 30 if iteracion == 1 else data['dc'] - 1
+        req = hacer_peticion(url_p, proxy, user_agent, intervalo, True, data)
         if verboso:
             print("URL de búsqueda: %s" % req.url)
             print("Data: %s" % data)
         soup = BeautifulSoup(req.text, 'lxml')
-        doc = html.fromstring(req.text)
-        if self.banned(req.url):
+        if self.banned(req.text):
             if verboso:
                 print('IP bloqueada\n')
             return -1
-        results = soup.findAll('div', { "class" : "result" })        
+        results = soup.findAll('div', { "class" : "result" })
         total = 0
         for result in results:
             r = result.find('h2', {'class' : 'result__title'})
-            titulo = r.text if r else ''
+            titulo = r.text.strip() if r else ''
             a = r.find('a', {'class', 'result__a'}) if r else None
             link = a.get('href', '') if a else ''
-            s = result.find('div', {'class': 'result__snippet'})
+            s = result.find('a', {'class': 'result__snippet'})
             descripcion = s.text if s else ''
-            if not resultados.get(link, None):
+            if not resultados.get(link, None) and a:
                 total += 1
                 if obten_emails:
                     self.get_emails(link, titulo, descripcion, resultados)
                 else:
                     resultados[link] = Resultado(link, titulo, descripcion)
-        try:
-            print('WATTTT')
-            form = doc.cssselect('.results_links_more form')[-1]
-        except IndexError:
-            return total, None
-        params = dict(form.fields)
-        print('PARAMS' + str(params))
-        return total, params
-
-    def busqueda(self, dicc, query, proxy, user_agent, num_res=50,
-                 no_params=False, intervalo=0, verboso=False):
-        if verboso:
-            print("Fecha: %s" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
-            myip(proxy, user_agent, intervalo)
-            print("Expansión: %s %s" % (dicc, query))
-        url, q = self.get_url(dicc, query)
-        resultados = {}
-        data = {'q': q, 's': '0'}
-        while len(resultados) < num_res:
-            nuevos, data = self.obten_resultados(url, resultados, data, proxy, user_agent,
-                               intervalo, not dicc.get('mail', None) is None, verboso)
-            if nuevos == 0 or data is None:
-                break
-            elif nuevos < 0:
-                return None
-        if no_params:
-            tmp = {}
-            for k, v in resultados.items():
-                v.url = k.split('?', maxsplit=1)[0]
-                tmp[v.url] = v
-            return [v for k, v in tmp.items()]
-        return [v for k, v in resultados.items()]
+        return total
     
 class BuscadorPastebin(Buscador):
 
