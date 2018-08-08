@@ -145,7 +145,7 @@ class BuscadorGoogle(Buscador):
         soup = BeautifulSoup(req.text, 'lxml')
         if self.banned(req.url):
             if verboso:
-                print('IP bloqueada\n')
+                print('ERROR DE BÚSQUEDA: IP BLOQUEADA\n')
             return -1
         results = soup.findAll('div', { "class" : "g" })
         total = 0
@@ -177,20 +177,22 @@ class BuscadorBing(Buscador):
 
     def get_url(self, dicc, query):
         url = "https://www.bing.com/search?q="
-        for k, v in dicc.items():
+        q = ''
+        for k, v in dicc.items():            
             if k == 'mail':
-                url += '"@%s" ' % v
+                q += '"@%s" ' % v
             elif k == 'exclude':
-                url += '-%s ' % v
+                q += '-%s ' % v
             elif k == 'include':
-                url += '+%s ' % v
+                q += '+%s ' % v
             elif k == 'inurl':
-                url += "instreamset:url:%s " % v
+                q += "instreamset:url:%s " % v
             elif k == 'exact_word':
-                url += '"%s" ' % v
+                q += '"%s" ' % v
             else:
-                url += "%s:%s " % (k, v)
-        return '%s%s' % (url, query)
+                q += "%s:%s " % (k, v)
+        q += query
+        return '%s%s&pq=%s&sc=0-30&sk=&sp=-1' % (url, q, q)
 
     def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):

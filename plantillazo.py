@@ -24,14 +24,14 @@ import optparse
 from random import randint
 from formato import formato
 from buscador import FabricaBuscador
-from aux import user_agents, proxies, printError
+from aux import user_agents, printError
 
 def addOptions():
     """
     Aquí se configuraron las banderas posibles para la ejecución del programa
     """
     parser = optparse.OptionParser()
-    parser.add_option('-v', '--verbose', dest='verbose', default=None, action='store_true', help='Indica que se utilice el modo verboso.')
+    parser.add_option('-v', '--verbose', dest='verbose', default=False, action='store_true', help='Indica que se utilice el modo verboso.')
     parser.add_option('-n', '--num-res', dest='num_res', default='50', help='Numero de resultados por busqueda')
     parser.add_option('-b', '--buscadores', dest='buscadores', default='google', help='Se especifica el buscador a utilizar')
     parser.add_option('-N', '--no-params', dest='no_params', default=False, action='store_true', help='Excluye los parametros GET, haciendo unica cada busqueda')
@@ -50,9 +50,10 @@ def addOptions():
     parser.add_option('-I', '--include', dest='include', default=None, help='Se incluyen los resultados que contengan esa palabra')
     parser.add_option('-u', '--inurl', dest='inurl', default=None, help='Se buscan las palabras dentro de la url, separadas por comas')
     parser.add_option('-o', '--output', dest='output', default='resultados', help='Nombre de los archivos de reporte.')
+    parser.add_option('-t', '--tor', dest='tor', default=False, action='store_true', help='Indica que se haga uso de tor para hacer las peticiones (junto con otros proxies, si se utiliza la opcion -P).')
     return parser.parse_args()
 
-def lee_proxies(p_lst):
+def lee_proxies(p_lst, proxies):
     with open(p_lst) as f:
         for p in f.readlines():
             p = p.strip()
@@ -109,8 +110,11 @@ if __name__ == '__main__':
             print("Uso: python3 %s {<busqueda> [opciones] | {f --filetype | s --site | h --help | "
                   "p --ip | u --inurl | m --mail} [opciones]" % sys.argv[0])
             sys.exit(1)
+        proxies = []
         if opts.proxies:
-            lee_proxies(opts.proxies)
+            lee_proxies(opts.proxies, proxies)
+        if opts.tor:
+            proxies.append({'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'})
         if opts.user_agents:
             lee_user_agents(opts.user_agents)
         buscadores = []
@@ -121,13 +125,16 @@ if __name__ == '__main__':
         queries = [y for x in q for y in list(exrex.generate(x))] if opts.regex else q
         expansiones = expandir(queries, opts)
         if opts.verbose:
-            print("Expansiones: %s\n" % str(expansiones))
+            print("Expansiones: %s" % str(expansiones))
+            print("Proxies en uso: %s\n" % proxies)
         intervalo = int_or_0(opts.intervalo)
         num_res = int_or_0(opts.num_res)
         resultados = {}
         for d, q in expansiones:
-            i = randint(0, len(proxies) - 1)
-            proxy = proxies[i]
+            proxy = None
+            if len(proxies) > 0:
+                i = randint(0, len(proxies) - 1)
+                proxy = proxies[i]
             for b in buscadores:
                 user_agent = user_agents[randint(0, len(user_agents) - 1)]
                 r = b.busqueda(d, q, proxy, user_agent, num_res,
