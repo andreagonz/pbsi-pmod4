@@ -9,6 +9,9 @@ Iniciarlo: service tor start o simplemente colocar el comado tor (Depende de com
 
 Ademas instalar:
 
+apt-get install python3-pip
+apt-get install libxml2-dev libxslt1-dev zlib1g-dev
+
 pip3 install exrex
 pip3 install bs4
 pip3 install lxml
