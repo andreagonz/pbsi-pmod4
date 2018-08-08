@@ -89,7 +89,7 @@ class Buscador():
         Regresa None si la ip ha sido bloqueada.
         """
         if verboso:
-            print("Fecha: %s" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
+            print("\nFecha: %s" % datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
             myip(proxy, user_agent, intervalo)
             print("Expansión: %s %s" % (dicc, query))
         url = self.get_url(dicc, query)
@@ -146,7 +146,7 @@ class BuscadorGoogle(Buscador):
         soup = BeautifulSoup(req.text, 'lxml')
         if self.banned(req.url):
             if verboso:
-                print('ERROR DE BÚSQUEDA: IP BLOQUEADA\n')
+                print('ERROR DE BÚSQUEDA: IP BLOQUEADA')
             return -1
         results = soup.findAll('div', { "class" : "g" })
         total = 0
@@ -203,6 +203,8 @@ class BuscadorBing(Buscador):
             print("URL de búsqueda: %s" % req.url)
         soup = BeautifulSoup(req.text, 'lxml')
         if self.banned(soup.text):
+            if verboso:
+                print('ERROR DE BÚSQUEDA: IP BLOQUEADA')
             return -1
         [s.extract() for s in soup('span')]
         for match in soup.findAll('strong'):
@@ -265,7 +267,7 @@ class BuscadorDuckduckgo(Buscador):
         soup = BeautifulSoup(req.text, 'lxml')
         if self.banned(req.text):
             if verboso:
-                print('IP bloqueada\n')
+                print('ERROR DE BÚSQUEDA: IP BLOQUEADA')
             return -1
         results = soup.findAll('div', { "class" : "result" })
         total = 0
@@ -340,6 +342,8 @@ class BuscadorBoardreader(Buscador):
         url_b = 'https://boardreader.com'
         req = hacer_peticion(url_b, proxy, user_agent, intervalo, sesion=s)
         if self.banned(req.text):
+            if verboso:
+                print('IP bloqueada')
             return -1
         dicc, url_p = url
         url_p += "&page=%d" % (iteracion + 1)
