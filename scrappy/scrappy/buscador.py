@@ -6,7 +6,10 @@ from aux import email_regex, printError
 from navegacion import hacer_peticion
 from datetime import datetime
 from bs4 import BeautifulSoup
+from dns import resolver
+from dns import reversename
 import requests
+import socket
 import urllib
 import json
 import re
@@ -24,8 +27,6 @@ class FabricaBuscador():
             return BuscadorPastebin()
         if nombre == 'boardreader':
             return BuscadorBoardreader()
-        if nombre == 'zone-h':
-            return BuscadorZoneH()
         return None
         
 class Resultado():
@@ -304,9 +305,17 @@ class BuscadorBoardreader(Buscador):
 
     def banned(self, html):
         return False
-    
+
+    def get_dominio(self, ip):
+        try:
+            domain_address = reversename.from_address(ip)
+            return str(resolver.query(domain_address, "PTR")[0])[:-1]
+        except Exception as e:
+            return ip
+        
     def get_url(self, dicc, query):
         url = "https://boardreader.com/return.php?query="
+        d = dicc.copy()
         for k, v in dicc.items():
             if k == 'mail':
                 url += '"@%s" ' % v
@@ -316,8 +325,14 @@ class BuscadorBoardreader(Buscador):
                 url += '%s ' % v
             elif k == 'exact_word':
                 url += '"%s" ' % v
+            elif k == 'filetype':
+                query += ' %s' % v
+            elif k == 'inurl':
+                query += ' %s' % v
+        if dicc.get('ip', None):
+            d['site'] = self.get_dominio(dicc['ip'])
         url = '%s%s&language=English' % (url, '%s' % query if query else '')
-        return url + "&domain=%s" % dicc['site'] if dicc.get('site', None) else url
+        return d, url + "&domain=%s" % dicc['site'] if dicc.get('site', None) else url
 
     def obten_resultados(self, url, resultados, iteracion, proxy,
                          user_agent, intervalo, obten_emails, verboso=False):
@@ -326,7 +341,8 @@ class BuscadorBoardreader(Buscador):
         req = hacer_peticion(url_b, proxy, user_agent, intervalo, sesion=s)
         if self.banned(req.text):
             return -1
-        url_p = url + "&page=%d" % (iteracion + 1)
+        dicc, url_p = url
+        url_p += "&page=%d" % (iteracion + 1)
         req = hacer_peticion(url_p, proxy, user_agent, intervalo, sesion=s)
         if verboso:
             print("URL de búsqueda: %s" % req.url)
@@ -338,6 +354,12 @@ class BuscadorBoardreader(Buscador):
         for result in results:
             titulo = result.get('Subject', '').replace('[Keyword]', '').replace('[/Keyword]', '')
             link = result.get('Url', '')
+            if dicc.get('filetype', None) and \
+               (not (link.endswith(dicc['filetype'])
+                     or (link.endswith(dicc['filetype'].upper())))):
+                continue
+            if dicc.get('inurl', None) and not dicc['inurl'] in link:
+                continue
             if not resultados.get(link, None):
                 total += 1
                 descripcion = result.get('Text', '').replace('[Keyword]', '').replace('[/Keyword]', '').replace('\n', ' ')

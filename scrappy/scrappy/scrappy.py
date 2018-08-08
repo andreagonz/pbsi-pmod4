@@ -6,18 +6,19 @@
 Se debe instalar TOR
 Debian: apt-get install tor
 Iniciarlo: service tor start o simplemente colocar el comado tor (Depende de como es que se haya instalado)
-De igual forma se debe instalar socks
-Debian: apt-get install python3-socks
 
 Ademas instalar:
 
-apt-get install python3-pip
 pip3 install exrex
-pip3 install BeautifulSoup4
+pip3 install bs4
 pip3 install lxml
+pip3 install requests
+pip3 install requests[sockets]
+pip3 install dnspython
 
 """
 
+import re
 import sys
 import exrex
 import optparse
@@ -120,8 +121,10 @@ if __name__ == '__main__':
         buscadores = []
         fabrica = FabricaBuscador()
         for x in opts.buscadores.split(','):
-            buscadores.append(fabrica.get_buscador(x.strip()))
-        q = [x.strip() for x in args[0].split('+')] if len(args) > 0 else [""]
+            buscadores.append(fabrica.get_buscador(x.strip()))            
+        q = ['']
+        if len(args) > 0:
+            q = [x.strip().replace('[OP_SUM]', '+') for x in args[0].replace('\+', '[OP_SUM]').split('+')]
         queries = [y for x in q for y in list(exrex.generate(x))] if opts.regex else q
         expansiones = expandir(queries, opts)
         if opts.verbose:
@@ -136,6 +139,8 @@ if __name__ == '__main__':
                 i = randint(0, len(proxies) - 1)
                 proxy = proxies[i]
             for b in buscadores:
+                if not b:
+                    continue
                 user_agent = user_agents[randint(0, len(user_agents) - 1)]
                 r = b.busqueda(d, q, proxy, user_agent, num_res,
                                opts.no_params, intervalo, opts.verbose)
