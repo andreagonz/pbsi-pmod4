@@ -3,14 +3,14 @@
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[spanish,activeacute]{babel}
+% \usepackage[spanish,activeacute]{babel}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \graphicspath{{media/}}
 \usepackage{float}
 \usepackage{caption}
-\usepackage[toc]{multitoc}
-\setcounter{tocdepth}{2}
+% \usepackage[toc]{multitoc}
+% \setcounter{tocdepth}{2}
 % automata
 \usepackage{tikz}
 \usepackage{pmboxdraw} 
@@ -24,12 +24,91 @@
 %   Estados Unidos: Wiley.
 %   
 % \end{thebibliography}
-
-\title{TITULO}
-\author{Andrea Itzel González Vargas}
-\date{ALGO}
+\title{Plan de Becarios en Seguridad Informática\\Proyecto Módulo 4 - Manual de Usuario}
+\author{Rafel Diez Gutierrez González\\Andrea Itzel González Vargas}
+% \date{ALGO}
 \setlength{\parindent}{0em}
 
 \begin{document}
 \maketitle
+
+El presente proyecto realiza un \textit{scraping} de los buscadores web Bing, Google, DuckDuckGo y Board Reader, con la opcion de hacer busquedas en Pastebin. El lenguaje de programacion utilizado es \textsf{Python 3}.
+
+\section{Instalacion de dependencias}
+Para hacer la instalacion de las dependencias se debe de correr el script \texttt{scrappy/dependencias.sh}, tambien existe la posibilidad de ejecutar el comando
+\begin{verbatim}
+  $ python3 scrappy/setup.py install
+\end{verbatim}
+lo cual iniciara la instalacion de dependencias.
+
+\section{Ejecucion}
+Para ejecutar el programa se debe de utilizar el siguiente comando:
+
+\begin{verbatim}
+  $ python3 scrappy.py {<busqueda> [opciones] | [busqueda] {f --filetype | 
+           s --site | h --help | p --ip | u --inurl | m --mail} [opciones]
+\end{verbatim}
+
+Donde las opciones tienen el siguiente significado:
+\begin{verbatim}
+  -h, --help            Muestra mensajes de ayuda
+  -v, --verbose         Indica que se utilice el modo verboso.
+  -n NUM_RES, --num-res=NUM_RES
+                        Numero de resultados por busqueda
+  -b BUSCADORES, --buscadores=BUSCADORES
+                        Se especifica el buscador a utilizar
+  -N, --no-params       Excluye los parametros GET, haciendo unica cada
+                        busqueda
+  -r, --regex           Se pueden usar Expresiones Regulares
+  -d, --domains         Indica que se impriman unicamente los dominios en los
+                        reportes
+  -U USER_AGENTS, --user-agents=USER_AGENTS
+                        Archivo con agentes de usuario a utilizar, separados
+                        por un salto de linea
+  -P PROXIES, --proxies=PROXIES
+                        Archivo con proxies a utilizar, separados por un salto
+                        de linea
+  -F FORMATO, --formato=FORMATO
+                        Especifica el formato de salida
+  -i INTERVALO, --intervalo=INTERVALO
+                        Se especifica el intervalo de tiempo por busqueda
+  -p IP, --ip=IP        Se especifica la(s) IP(s) de busqueda, separadas por
+                        una coma
+  -m MAIL, --mail=MAIL  Busca correos electronicos en los dominios
+                        especificados, separados por una coma
+  -f FILETYPE, --filetype=FILETYPE
+                        Se busca por los tipos de archivo especificados,
+                        separados por una coma
+  -s SITE, --site=SITE  Se busca por los sitios web especificados, separados
+                        por una coma
+  -e EXCLUDE, --exclude=EXCLUDE
+                        Se excluyen los resultados que contengan las palabras
+                        indicadas, separadas por una coma
+  -w EXACT_WORD, --exact-word=EXACT_WORD
+                        Se buscan las palabras indicadas de manera exacta,
+                        cada una va separada por una coma
+  -I INCLUDE, --include=INCLUDE
+                        Se incluyen los resultados que contengan esa palabra
+  -u INURL, --inurl=INURL
+                        Se buscan las palabras dentro de la url, separadas por
+                        comas
+  -o OUTPUT, --output=OUTPUT
+                        Nombre de los archivos de reporte.
+  -t, --tor             Indica que se haga uso de tor para hacer las
+                        peticiones (junto con otros proxies, si se utiliza la
+                        opcion -P).
+\end{verbatim}
+
+El parametro \texttt{<busqueda>} es la busqueda principal a ser realizada, si esta tiene la forma \texttt{palabra1 + palabra2}, se indica que se haga la busqueda independiente del termino \texttt{palabra1} y el termino \texttt{palabra2}, es decir, el simbolo \texttt{+} es equivalente a un \texttt{OR}. \\
+
+En el caso de utilizar la opcion \texttt{-r}, el parametro \texttt{<busqueda>} sera tomado como una expresion regular, cuyas expansiones comprenderan los terminos a ser buscados independientemente.
+
+\section{Ejemplo de ejecucion}
+
+Al ejecutar el siguiente comando se hace la busqueda del termino \texttt{gatos}, utilizando los buscadores Bing y Google. Unicamente se obtienen busquedas de archivos PDF en el dominio \texttt{unam.mx}, obteniendose aproximadamente 15 resultados por busqueda. Las peticiones se realizan anonimamente a traves de Tor. El reporte de resultados sera generado en tres formatos, \texttt{xml}, \texttt{html} y \texttt{txt}, los cuales tendran el nombre \texttt{busquedas.[html|xml|txt]}. Al estarse utilizando el modo verboso, se mostraran mensajes durante la ejecucion del programa.
+\begin{verbatim}
+  $ python3 scrappy.py -f pdf -b bing,google "gatos" -F xml,html,txt \
+        -s unam.mx -n 15 -t -o busquedas -v
+\end{verbatim}
+
 \end{document}

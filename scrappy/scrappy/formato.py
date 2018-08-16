@@ -183,7 +183,7 @@ th, td {
                 f.write((tabla%(x.titulo,x.url,x.texto)))
                 #f.write(tabla)
         f.write("\n###########################\n")
-        f.close()
+    f.close()
 
     return 'html'
     
