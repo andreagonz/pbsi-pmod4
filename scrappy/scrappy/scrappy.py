@@ -111,7 +111,7 @@ if __name__ == '__main__':
         opts, args = addOptions()
         if len(args) == 0 and not opts.mail and not opts.ip and \
            not opts.filetype and not opts.inurl and not opts.site:
-            print("Uso: python3 %s {<busqueda> [opciones] | {f --filetype | s --site | h --help | "
+            print("Uso: python3 %s {<busqueda> [opciones] | [busqueda] {f --filetype | s --site | h --help | "
                   "p --ip | u --inurl | m --mail} [opciones]" % sys.argv[0])
             sys.exit(1)
         proxies = []
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         expansiones = expandir(queries, opts)
         if opts.verbose:
             print("Expansiones: %s" % str(expansiones))
-            print("Proxies en uso: %s\n" % proxies)
+            print("Proxies en uso: %s" % proxies)
         intervalo = int_or_0(opts.intervalo)
         num_res = int_or_0(opts.num_res)
         resultados = {}
